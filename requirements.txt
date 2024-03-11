@@ -1,0 +1,6 @@
+requests
+httpx
+openai
+loguru
+sanic
+sqlitedict
