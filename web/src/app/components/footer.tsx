@@ -20,8 +20,6 @@ export const Footer: FC = () => {
         </div>
         <div>if you need a performant and scalable AI cloud!</div>
       </div>
-
-      
     </div>
   );
 };
