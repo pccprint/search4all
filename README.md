@@ -39,7 +39,7 @@ cd web && npm install && npm run build
 ```
 3. Run server
 ```shell
-BACKEND=BING python search4all.py
+BACKEND=BING python3 search4all.py
 ```
 
 For Google Search using SearchApi:
