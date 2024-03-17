@@ -46,26 +46,26 @@ cd web && npm install && npm run build
 ```
 3. Run server
 ```shell
-BACKEND=BING python search_with_lepton.py
+BACKEND=BING python search4all.py
 ```
 
 For Google Search using SearchApi:
 ```shell
 export SEARCHAPI_API_KEY=YOUR_SEARCHAPI_API_KEY
-BACKEND=SEARCHAPI python search_with_lepton.py
+BACKEND=SEARCHAPI python search4all.py
 ```
 
 For Google Search using Serper:
 ```shell
 export SERPER_SEARCH_API_KEY=YOUR_SERPER_API_KEY
-BACKEND=SERPER python search_with_lepton.py
+BACKEND=SERPER python search4all.py
 ```
 
 For Google Search using Programmable Search Engine:
 ```shell
 export GOOGLE_SEARCH_API_KEY=YOUR_GOOGLE_SEARCH_API_KEY
 export GOOGLE_SEARCH_CX=YOUR_GOOGLE_SEARCH_ENGINE_ID
-BACKEND=GOOGLE python search_with_lepton.py
+BACKEND=GOOGLE python search4all.py
 ```
 
 
@@ -79,7 +79,7 @@ You can deploy this to Lepton AI with one click:
 You can also deploy your own version via
 
 ```shell
-lep photon run -n search-with-lepton-modified -m search_with_lepton.py --env BACKEND=BING --env BING_SEARCH_V7_SUBSCRIPTION_KEY=YOUR_BING_SUBSCRIPTION_KEY
+lep photon run -n search-with-lepton-modified -m search4all.py --env BACKEND=BING --env BING_SEARCH_V7_SUBSCRIPTION_KEY=YOUR_BING_SUBSCRIPTION_KEY
 ```
 
 Learn more about `lep photon` [here](https://www.lepton.ai/docs).

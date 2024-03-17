@@ -7,6 +7,7 @@ import traceback
 import httpx
 from typing import Annotated, List, Generator
 from openai import AsyncOpenAI
+from openai import AsyncOpenAI
 from loguru import logger
 
 import sanic
@@ -84,14 +85,7 @@ stop_words = [
 # questions. This is not ideal, but it is a good tradeoff between response time
 # and quality.
 _more_questions_prompt = """
-You are a helpful assistant that helps the user to ask related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups, and write questions no longer than 20 words each. Please make sure that specifics, like events, names, locations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "the Manhattan project", in the follow up question, do not just say "the project", but use the full name "the Manhattan project". Your related questions must be in the same language as the original question.
-
-Here are the contexts of the question:
-
-{context}
-
-Remember, based on the original question and related contexts, suggest three such further questions. Do NOT repeat the original question. Each related question should be no longer than 20 words. Here is the original question:
-"""
+You are a search term generation assistant for related questions, and can provide 3-5 related question words based on the user's question. Please identify valuable topics to follow up on and write no more than 20 words for each question. Please ensure that the follow-up questions include details such as the event, name, location, etc., so that you can ask independently. For example, if the initial question asks about the "Manhattan Project", then in subsequent questions, don't just say "Project", but use the full name "Manhattan Project". Your answer format must be strictly [1: Question 1 \ n2: Question 2 \ n3: Question 3 \ n4: Question 4 \ n5: Related Question 5] Don't repeat the original question, you must output it in the format I provided!! Each related question should not exceed 20 words. Here are the user's questions:"""
 
 
 class KVWrapper(object):
@@ -396,61 +390,33 @@ async def server_init(_app, loop):
 
 async def get_related_questions(_app, query, contexts):
     """
-    Gets related questions based on the query and context.
+    Gets related questions based on the query using the gpt-3.5-turbo model.
     """
-
-    def ask_related_questions(
-        questions: Annotated[
-            List[str],
-            [
-                (
-                    "question",
-                    Annotated[
-                        str,
-                        "related question to the original question and context.",
-                    ],
-                )
-            ],
-        ],
-    ):
-        """
-        ask further questions that are related to the input and output.
-        """
-        pass
 
     try:
         openai_client = new_async_client(_app)
-        response = await openai_client.chat.completions.create(
+        llm_response = await openai_client.chat.completions.create(
             model=_app.ctx.model,
             messages=[
-                {
-                    "role": "system",
-                    "content": _more_questions_prompt.format(
-                        context="\n\n".join([c["snippet"] for c in contexts])
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": query,
-                },
+                {"role": "system", "content": _more_questions_prompt},
+                {"role": "user", "content": query},
             ],
-            tools=[
-                {
-                    "type": "function",
-                    # "function": tool.get_tools_spec(ask_related_questions),
-                }
-            ],
-            max_tokens=512,
+            max_tokens=1024,
+            temperature=0.9,
         )
-        related = response.choices[0].message.tool_calls[0].function.arguments
-        if isinstance(related, str):
-            related = json.loads(related)
-        logger.trace(f"Related questions: {related}")
-        return related["questions"][:5]
+        content = llm_response.choices[0].message.content
+        questions = []
+        for line in content.split('\n'):
+            if line.strip().startswith('1:') or line.strip().startswith('2:') or line.strip().startswith('3:'):
+                question_text = line.split(':', 1)[1].strip()
+                questions.append({"question": question_text})
+        if questions:
+            return questions[:5]
+        else:
+            return []
     except Exception as e:
-        # For any exceptions, we will just return an empty list.
         logger.error(
-            "encountered error while generating related questions:"
+            "Encountered error while generating related questions:"
             f" {e}\n{traceback.format_exc()}"
         )
         return []
@@ -575,7 +541,6 @@ async def query_function(request: sanic.Request):
                 {"role": "user", "content": query},
             ],
             max_tokens=1024,
-            stop=stop_words,
             stream=True,
             temperature=0.9,
         )
