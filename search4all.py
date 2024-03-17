@@ -7,7 +7,6 @@ import traceback
 import httpx
 from typing import Annotated, List, Generator
 from openai import AsyncOpenAI
-from openai import AsyncOpenAI
 from loguru import logger
 from dotenv import load_dotenv
 load_dotenv()
