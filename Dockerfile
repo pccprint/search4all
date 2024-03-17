@@ -1,6 +1,10 @@
 # 使用官方 Python 基础镜像
 FROM python:3.9
 
+# 安装 Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+
 # 设置工作目录
 WORKDIR /
 
