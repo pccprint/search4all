@@ -25,7 +25,7 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 
 
 ```shell
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 ```
 
 

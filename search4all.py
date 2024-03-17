@@ -9,6 +9,8 @@ from typing import Annotated, List, Generator
 from openai import AsyncOpenAI
 from openai import AsyncOpenAI
 from loguru import logger
+from dotenv import load_dotenv
+load_dotenv()
 
 import sanic
 from sanic import Sanic
@@ -321,8 +323,8 @@ def search_with_searchapi(query: str, subscription_key: str):
 
 def new_async_client(_app):
     return AsyncOpenAI(
-        api_key=os.environ["OPENAI_API_KEY"],
-        base_url=os.environ["OPENAI_BASE_URL"],
+        api_key=os.getenv["OPENAI_API_KEY"],
+        base_url=os.getenv["OPENAI_BASE_URL"],
         http_client=_app.ctx.http_session,
     )
 
@@ -332,44 +334,44 @@ async def server_init(_app, loop):
     """
     Initializes global configs.
     """
-    _app.ctx.backend = os.environ["BACKEND"].upper()
+    _app.ctx.backend = os.getenv["BACKEND"].upper()
     # if _app.ctx.backend == "LEPTON":
     #     from leptonai import Client
 
     #     _app.ctx.leptonsearch_client = Client(
     #         "https://search-api.lepton.run/",
-    #         token=os.environ.get("LEPTON_WORKSPACE_TOKEN"),
+    #         token=os.getenv.get("LEPTON_WORKSPACE_TOKEN"),
     #         stream=True,
     #         timeout=httpx.Timeout(connect=10, read=120, write=120, pool=10),
     #     )
     if _app.ctx.backend == "BING":
-        _app.ctx.search_api_key = os.environ["BING_SEARCH_V7_SUBSCRIPTION_KEY"]
+        _app.ctx.search_api_key = os.getenv["BING_SEARCH_V7_SUBSCRIPTION_KEY"]
         _app.ctx.search_function = lambda query: search_with_bing(
             query,
             _app.ctx.search_api_key,
         )
     elif _app.ctx.backend == "GOOGLE":
-        _app.ctx.search_api_key = os.environ["GOOGLE_SEARCH_API_KEY"]
+        _app.ctx.search_api_key = os.getenv["GOOGLE_SEARCH_API_KEY"]
         _app.ctx.search_function = lambda query: search_with_google(
             query,
             _app.ctx.search_api_key,
-            os.environ["GOOGLE_SEARCH_CX"],
+            os.getenv["GOOGLE_SEARCH_CX"],
         )
     elif _app.ctx.backend == "SERPER":
-        _app.ctx.search_api_key = os.environ["SERPER_SEARCH_API_KEY"]
+        _app.ctx.search_api_key = os.getenv["SERPER_SEARCH_API_KEY"]
         _app.ctx.search_function = lambda query: search_with_serper(
             query,
             _app.ctx.search_api_key,
         )
     elif _app.ctx.backend == "SEARCHAPI":
-        _app.ctx.search_api_key = os.environ["SEARCHAPI_API_KEY"]
+        _app.ctx.search_api_key = os.getenv["SEARCHAPI_API_KEY"]
         _app.ctx.search_function = lambda query: search_with_searchapi(
             query,
             _app.ctx.search_api_key,
         )
     else:
         raise RuntimeError("Backend must be BING, GOOGLE, SERPER or SEARCHAPI.")
-    _app.ctx.model = os.environ["LLM_MODEL"]
+    _app.ctx.model = os.getenv["LLM_MODEL"]
     _app.ctx.handler_max_concurrency = 16
     # An executor to carry out async tasks, such as uploading to KV.
     _app.ctx.executor = concurrent.futures.ThreadPoolExecutor(
@@ -380,7 +382,7 @@ async def server_init(_app, loop):
     _app.ctx.kv = KVWrapper(os.getenv("KV_NAME") or "search.db")
     # whether we should generate related questions.
     _app.ctx.should_do_related_questions = bool(
-        os.environ["RELATED_QUESTIONS"] in ("1", "yes", "true")
+        os.getenv["RELATED_QUESTIONS"] in ("1", "yes", "true")
     )
     # Create httpx Session
     _app.ctx.http_session = httpx.AsyncClient(
