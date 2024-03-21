@@ -2,7 +2,7 @@
 <h1 align="center">Search with Lepton</h1>
 Build your own conversational search engine using less than 500 lines of code.
 <br/>
-<a href="https://search.lepton.run/" target="_blank"> Live Demo </a>
+<a href="https://search2ai.online/website" target="_blank"> Live Demo </a>
 <br/>
 <img width="70%" src="https://github.com/leptonai/search_with_lepton/assets/1506722/845d7057-02cd-404e-bbc7-60f4bae89680">
 </div>
@@ -15,8 +15,11 @@ Build your own conversational search engine using less than 500 lines of code.
 - Shareable, cached search results
 
 ## Setup Search Engine API
-There are two default supported search engines: Bing and Google.
- 
+There are three default supported search engines: Bing、Google，and you can also use my own search1api service, it supports Google、Bing、Duckduckgo search
+
+### Search1API
+Search1API is a versatile search aggregation service that enables you to perform searches across Google, Bing, and DuckDuckGo, and also retrieve clear content from URLs.[this link]( https://docs.search2ai.online/introduction)
+
 ### Bing Search
 To use the Bing Web Search API, please visit [this link](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api) to obtain your Bing subscription key.
 
@@ -27,11 +30,18 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 ```shell
 pip3 install -r requirements.txt
 ```
-
-
-1. Set Bing subscription key
+0. Set you LLM
 ```shell
-export BING_SEARCH_V7_SUBSCRIPTION_KEY=YOUR_BING_SUBSCRIPTION_KEY
+export OPENAI_API_KEY=
+OPENAI_BASE_URL=
+LLM_MODEL=gpt-3.5-turbo-0125
+RELATED_QUESTIONS=1
+NODE_ENV=production
+```
+
+1. Set your key of search
+```shell
+export SEARCH1API_KEY=YOUR_SEARCH1API_KEY
 ```
 2. Build web
 ```shell
@@ -39,6 +49,14 @@ cd web && npm install && npm run build
 ```
 3. Run server
 ```shell
+BACKEND=SEARCH1API python3 search4all.py
+```
+
+Others Search Service if you want
+
+For Bing Search using Azure
+```shell
+export BING_SEARCH_V7_SUBSCRIPTION_KEY=YOUR_BING_SUBSCRIPTION_KEY
 BACKEND=BING python3 search4all.py
 ```
 

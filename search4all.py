@@ -32,6 +32,8 @@ BING_MKT = "en-US"
 GOOGLE_SEARCH_ENDPOINT = "https://customsearch.googleapis.com/customsearch/v1"
 SERPER_SEARCH_ENDPOINT = "https://google.serper.dev/search"
 SEARCHAPI_SEARCH_ENDPOINT = "https://www.searchapi.io/api/v1/search"
+SEARCH1API_SEARCH_ENDPOINT = "https://search.search2ai.one/"
+
 
 
 # Specify the number of references from the search engine you want to use.
@@ -103,7 +105,29 @@ class KVWrapper(object):
         self._db[key] = value
         self._db.commit()
 
-
+def search_with_search1api(query: str, search1api_key: str):
+    """
+    Search with bing and return the contexts.
+    """
+    payload = {
+        "max_results": 10,
+        "query": query
+    }   
+    headers = {
+    "Authorization": f"Bearer {search1api_key}",
+    "Content-Type": "application/json"
+    }
+    response = requests.request("POST", SEARCH1API_SEARCH_ENDPOINT, json=payload, headers=headers)
+    if not response.ok:
+        logger.error(f"{response.status_code} {response.text}")
+        raise HTTPException("Search engine error.")
+    json_content = response.json()
+    try:
+        contexts = json_content[:REFERENCE_COUNT]
+    except KeyError:
+        logger.error(f"Error encountered: {json_content}")
+        return []
+    return contexts
 def search_with_bing(query: str, subscription_key: str):
     """
     Search with bing and return the contexts.
@@ -368,8 +392,14 @@ async def server_init(_app, loop):
             query,
             _app.ctx.search_api_key,
         )
+    elif _app.ctx.backend == "SEARCH1API":
+        _app.ctx.search1api_key = os.getenv("SEARCH1API_KEY")
+        _app.ctx.search_function = lambda query: search_with_search1api(
+            query,
+            _app.ctx.search1api_key,
+        )
     else:
-        raise RuntimeError("Backend must be BING, GOOGLE, SERPER or SEARCHAPI.")
+        raise RuntimeError("Backend must be BING, GOOGLE, SERPER or SEARCHAPI or SEARCH1API.")
     _app.ctx.model = os.getenv("LLM_MODEL")
     _app.ctx.handler_max_concurrency = 16
     # An executor to carry out async tasks, such as uploading to KV.
