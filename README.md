@@ -1,5 +1,5 @@
 <div align="center">
-<h1 align="center">Search with Lepton</h1>
+<h1 align="center">Search4All</h1>
 Build your own conversational search engine using less than 500 lines of code.
 <br/>
 <a href="https://search2ai.online/website" target="_blank"> Live Demo </a>
