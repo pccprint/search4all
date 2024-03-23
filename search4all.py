@@ -124,6 +124,10 @@ def search_with_search1api(query: str, search1api_key: str):
     json_content = response.json()
     try:
         contexts = json_content[:REFERENCE_COUNT]
+        # fix the format
+        for item in contexts:
+            item["name"] = item["title"]
+            item["url"] = item["link"]
     except KeyError:
         logger.error(f"Error encountered: {json_content}")
         return []
