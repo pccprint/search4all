@@ -1,6 +1,6 @@
 <div align="center">
 <h1 align="center">Search4All</h1>
-Build your own conversational search engine using less than 500 lines of code.
+The opensource AI search platform
 <br/>
 <a href="https://search2ai.online/website" target="_blank"> Live Demo </a>
 <br/>
@@ -15,10 +15,10 @@ Build your own conversational search engine using less than 500 lines of code.
 - Shareable, cached search results
 
 ## Setup Search Engine API
-There are three default supported search engines: Bing、Google，and you can also use my own search1api service, it supports Google、Bing、Duckduckgo search
+Choose your search service
 
 ### Search1API
-Search1API is a versatile search aggregation service that enables you to perform searches across Google, Bing, and DuckDuckGo, and also retrieve clear content from URLs.[this link]( https://docs.search2ai.online/introduction)
+Search1API is a versatile search aggregation service that enables you to perform searches across Google, Bing, and DuckDuckGo, and also retrieve clear content from URLs. [search1api website]( https://docs.search2ai.online/introduction)
 
 ### Bing Search
 To use the Bing Web Search API, please visit [this link](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api) to obtain your Bing subscription key.
@@ -27,54 +27,56 @@ To use the Bing Web Search API, please visit [this link](https://www.microsoft.c
 You have three options for Google Search: you can use the [SearchApi Google Search API](https://www.searchapi.io/) from SearchApi, [Serper Google Search API](https://www.serper.dev) from Serper, or opt for the [Programmable Search Engine](https://developers.google.com/custom-search) provided by Google.
 
 
+## Deployment
+### Zeabur
+
+<a href="https://zeabur.com/templates/8U7M3C?referralCode=fatwang2"><img src="https://zeabur.com/button.svg" alt="Deploy on Zeabur"/></a>
+
+### Docker
+
+```
+docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=https://api.openai.com/v1 -e LLM_MODEL=gpt-3.5-turbo-0125 -e RELATED_QUESTIONS=1 -e NODE_ENV=production -e SEARCH1API_KEY=XXX -e BACKEND=SEARCH1API -p 8800:8800 docker.io/fatwang2/search4all
+```
+### Manual
+1. install the requirements.txt
 ```shell
 pip3 install -r requirements.txt
 ```
-0. Set you LLM
+2. Set you LLM
 ```shell
-export OPENAI_API_KEY=
-OPENAI_BASE_URL=
+export OPENAI_API_KEY=sk-XXX
+OPENAI_BASE_URL=https://api.openai.com/v1
 LLM_MODEL=gpt-3.5-turbo-0125
 RELATED_QUESTIONS=1
 NODE_ENV=production
 ```
-
-1. Set your key of search
+3. Set your key of search
 ```shell
 export SEARCH1API_KEY=YOUR_SEARCH1API_KEY
 ```
-2. Build web
+4. Build web
 ```shell
 cd web && npm install && npm run build
 ```
-3. Run server
+5. Run server
 ```shell
 BACKEND=SEARCH1API python3 search4all.py
 ```
+## Environment Variable
+This project provides some additional configuration items set with environment variables:
 
-Others Search Service if you want
+| Environment Variable | Required | Description                                                                                                                                                               | Example                                                                                                              |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`     | Yes      | This is the API key you apply on the OpenAI account page                                                                                                                  | `sk-xxxxxx...xxxxxx`                                                                                                 |
+| `OPENAI_BASE_URL`   | No       | If you manually configure the OpenAI interface proxy, you can use this configuration item to override the default OpenAI API request base URL                             | The default value is<br/>`https://api.openai.com/v1` |                                                           |
+| `LLM_MODEL`      | Yes       | The model you want to use. | `gpt-3.5-turbo-0125`   
+| `RELATED_QUESTIONS`      | Yes       | Show the related questions. | `1`   
+| `NODE_ENV`      | Yes       | The environment you want to deploy. | `production`   
+| `BACKEND`      | Yes       | The search service you want. | `SEARCH1API,BING,GOOGLE,SERPER,SEARCHAPI`   
 
-For Bing Search using Azure
-```shell
-export BING_SEARCH_V7_SUBSCRIPTION_KEY=YOUR_BING_SUBSCRIPTION_KEY
-BACKEND=BING python3 search4all.py
-```
-
-For Google Search using SearchApi:
-```shell
-export SEARCHAPI_API_KEY=YOUR_SEARCHAPI_API_KEY
-BACKEND=SEARCHAPI python search4all.py
-```
-
-For Google Search using Serper:
-```shell
-export SERPER_SEARCH_API_KEY=YOUR_SERPER_API_KEY
-BACKEND=SERPER python search4all.py
-```
-
-For Google Search using Programmable Search Engine:
-```shell
-export GOOGLE_SEARCH_API_KEY=YOUR_GOOGLE_SEARCH_API_KEY
-export GOOGLE_SEARCH_CX=YOUR_GOOGLE_SEARCH_ENGINE_ID
-BACKEND=GOOGLE python search4all.py
-```
+## TODO
+- [ ] Support Lepton
+- [ ] Support continuous search
+- [ ] Support More LLMs
+- [x] Support the Docker
+- [x] Support the Zeabur

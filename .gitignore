@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+docker
 # C extensions
 *.so
 search.db
