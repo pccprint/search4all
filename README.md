@@ -30,7 +30,7 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 ## Deployment
 ### Zeabur
 
-<a href="https://zeabur.com/templates/8U7M3C?referralCode=fatwang2"><img src="https://zeabur.com/button.svg" alt="Deploy on Zeabur"/></a>
+<a href="https://zeabur.com/templates/YHKPET?referralCode=fatwang2"><img src="https://zeabur.com/button.svg" alt="Deploy on Zeabur"/></a>
 
 ### Docker
 
