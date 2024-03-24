@@ -28,7 +28,7 @@ COPY search4all.py .
 
 # Set environment variables
 ENV PORT 8800
-ENV backend=""
+ENV BACKEND=""
 ENV OPENAI_API_KEY=""
 ENV OPENAI_BASE_URL=""
 ENV LLM_MODEL=""
