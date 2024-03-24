@@ -1,6 +1,7 @@
 # Stage 1: Build Next.js frontend
 FROM node:20.11 as build-stage
 WORKDIR /app
+RUN echo "1" > /dev/null
 
 # Install dependencies
 COPY ./web/package*.json ./
