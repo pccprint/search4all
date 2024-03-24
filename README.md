@@ -35,7 +35,7 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 ### Docker
 
 ```
-docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=https://api.openai.com/v1 -e LLM_MODEL=gpt-3.5-turbo-0125 -e RELATED_QUESTIONS=1 -e NODE_ENV=production -e SEARCH1API_KEY=XXX -e BACKEND=SEARCH1API -p 8800:8800 docker.io/fatwang2/search4all
+docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=https://api.openai.com/v1 -e LLM_MODEL=gpt-3.5-turbo-0125 -e RELATED_QUESTIONS=1 -e SEARCH1API_KEY=XXX -e BACKEND=SEARCH1API -p 8800:8800 docker.io/fatwang2/search4all
 ```
 ### Manual
 1. install the requirements.txt
@@ -71,7 +71,7 @@ This project provides some additional configuration items set with environment v
 | `OPENAI_BASE_URL`   | No       | If you manually configure the OpenAI interface proxy, you can use this configuration item to override the default OpenAI API request base URL                             | The default value is<br/>`https://api.openai.com/v1` |                                                           |
 | `LLM_MODEL`      | Yes       | The model you want to use. | `gpt-3.5-turbo-0125`   
 | `RELATED_QUESTIONS`      | Yes       | Show the related questions. | `1`   
-| `NODE_ENV`      | Yes       | The environment you want to deploy. | `production`   
+| `NODE_ENV`      | Yes       | The environment required for deployment is necessary only during manual deployment. | `production`   
 | `BACKEND`      | Yes       | The search service you want. | `SEARCH1API,BING,GOOGLE,SERPER,SEARCHAPI`   
 
 ## TODO
