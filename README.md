@@ -55,8 +55,10 @@ services:
       LLM_MODEL: gpt-3.5-turbo-0125
       RELATED_QUESTIONS: 1
       NODE_ENV: production
-      SEARCH1API_KEY: xxxx
+      # Change your search provider name here, if use another different provider
       BACKEND: SEARCH1API
+      # Set your search key from your provider here
+      SEARCH1API_KEY: xxxx  
 ```
 
 ### Manual
