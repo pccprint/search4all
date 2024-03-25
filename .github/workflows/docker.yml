@@ -1,10 +1,18 @@
 name: Docker Image CI
 
+# push pr 的时候触发工作流
+# on:
+#   push:
+#     branches: [ "docker-deploy-add-arm64-and-tags" ] # 测试分支 正式启用改为 main 下同
+#     tags: [ "*" ]  # 监听所有标签推送事件
+#   pull_request:
+#     branches: [ "docker-deploy-add-arm64-and-tags" ]
+
+# 只有在发布的时候才会触发工作流
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
 
@@ -26,11 +34,24 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/search4all
+        tags: |
+          type=raw,value=latest
+          type=ref,event=tag
         
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
         context: .
+        platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/search4all:latest
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha # 缓存加速编译
+        cache-to: type=gha,mode=max
               
