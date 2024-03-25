@@ -33,33 +33,22 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 <a href="https://zeabur.com/templates/YHKPET?referralCode=fatwang2"><img src="https://zeabur.com/button.svg" alt="Deploy on Zeabur"/></a>
 
 ### Docker
+[Hub address](https://hub.docker.com/r/fatwang2/search4all)
 
 ```
 docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=https://api.openai.com/v1 -e LLM_MODEL=gpt-3.5-turbo-0125 -e RELATED_QUESTIONS=1 -e SEARCH1API_KEY=XXX -e BACKEND=SEARCH1API -p 8800:8800 docker.io/fatwang2/search4all
 ```
 
 ### Docker-Compose
-[Hub address](https://hub.docker.com/r/fatwang2/search4all)
+1. Download the docker-compose file on your mechine
+```
+wget https://raw.githubusercontent.com/fatwang2/search4all/main/docker-compose.yml
+```
+2. Change the environment variables in the file
 
-```yml
-version: '3.4'
-
-services:
-  search4all:
-    image: docker.io/fatwang2/search4all
-    restart: unless-stopped
-    ports:
-      - 8800:8800
-    environment:
-      OPENAI_API_KEY: sk-xxx
-      OPENAI_BASE_URL: https://api.openai.com/v1
-      LLM_MODEL: gpt-3.5-turbo-0125
-      RELATED_QUESTIONS: 1
-      NODE_ENV: production
-      # Change your search provider name here, if use another different provider
-      BACKEND: SEARCH1API
-      # Set your search key from your provider here
-      SEARCH1API_KEY: xxxx  
+3. Run the docker
+```
+docker compose up -d
 ```
 
 ### Manual
@@ -111,5 +100,7 @@ This project provides some additional configuration items set with environment v
 - [ ] Support Lepton
 - [ ] Support continuous search
 - [ ] Support More LLMs
+- [x] Support the related questions by function calling
 - [x] Support the Docker
+- [x] Support the Docker-Compose
 - [x] Support the Zeabur
