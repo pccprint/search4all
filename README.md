@@ -40,7 +40,8 @@ docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=http
 
 ### Docker-Compose
 [Hub address](https://hub.docker.com/r/fatwang2/search4all)
-```
+
+```yml
 version: '3.4'
 
 services:
