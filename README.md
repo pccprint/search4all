@@ -37,6 +37,28 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 ```
 docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=https://api.openai.com/v1 -e LLM_MODEL=gpt-3.5-turbo-0125 -e RELATED_QUESTIONS=1 -e SEARCH1API_KEY=XXX -e BACKEND=SEARCH1API -p 8800:8800 docker.io/fatwang2/search4all
 ```
+
+### Docker-Compose
+[Hub address](https://hub.docker.com/r/fatwang2/search4all)
+```
+version: '3.4'
+
+services:
+  search4all:
+    image: docker.io/fatwang2/search4all
+    restart: unless-stopped
+    ports:
+      - 8800:8800
+    environment:
+      OPENAI_API_KEY: sk-xxx
+      OPENAI_BASE_URL: https://api.openai.com/v1
+      LLM_MODEL: gpt-3.5-turbo-0125
+      RELATED_QUESTIONS: 1
+      NODE_ENV: production
+      SEARCH1API_KEY: xxxx
+      BACKEND: SEARCH1API
+```
+
 ### Manual
 1. install the requirements.txt
 ```shell
