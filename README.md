@@ -29,12 +29,12 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 
 ## Deployment
 ### Zeabur
+Just click it
 
 <a href="https://zeabur.com/templates/YHKPET?referralCode=fatwang2"><img src="https://zeabur.com/button.svg" alt="Deploy on Zeabur"/></a>
 
 ### Docker
-[Hub address](https://hub.docker.com/r/fatwang2/search4all)
-
+Change the environment variables and run the docker
 ```
 docker run -d --name search4all -e OPENAI_API_KEY=sk-XXX -e OPENAI_BASE_URL=https://api.openai.com/v1 -e LLM_MODEL=gpt-3.5-turbo-0125 -e RELATED_QUESTIONS=1 -e SEARCH1API_KEY=XXX -e BACKEND=SEARCH1API -p 8800:8800 docker.io/fatwang2/search4all
 ```
