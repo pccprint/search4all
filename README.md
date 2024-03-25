@@ -73,6 +73,14 @@ This project provides some additional configuration items set with environment v
 | `RELATED_QUESTIONS`      | Yes       | Show the related questions. | `1`   
 | `NODE_ENV`      | Yes       | The environment required for deployment is necessary only during manual deployment. | `production`   
 | `BACKEND`      | Yes       | The search service you want. | `SEARCH1API,BING,GOOGLE,SERPER,SEARCHAPI`   
+| `SEARCH1API_KEY`      | Yes       | If you choose SEARCH1API. | `xxx`   
+| `BING_SEARCH_V7_SUBSCRIPTION_KEY`      | Yes       | If you choose BING. | `xxx`   
+| `GOOGLE_SEARCH_CX`      | Yes       | If you choose GOOGLE. | `xxxx`   
+| `GOOGLE_SEARCH_API_KEY`      | Yes       | If you choose GOOGLE. | `xxx`   
+| `SEARCHAPI_API_KEY`      | Yes       | If you choose SEARCHAPI. | `xxx`   
+| `SERPER_SEARCH_API_KEY`      | Yes       | If you choose SERPER. | `xxx`   
+
+
 
 ## TODO
 - [ ] Support Lepton
