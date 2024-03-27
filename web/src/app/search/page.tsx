@@ -18,7 +18,7 @@ export default function SearchPage() {
         <div className="h-80 pointer-events-none w-full rounded-b-2xl backdrop-filter absolute bottom-0 bg-gradient-to-b from-transparent to-white [mask-image:linear-gradient(to_top,white,transparent)]"></div>
         <div className="absolute z-10 flex items-center justify-center bottom-6 px-4 md:px-8 w-full">
           <div className="w-full">
-            <Search></Search>
+            <Search useContinueButton={true}></Search>
           </div>
         </div>
       </div>
