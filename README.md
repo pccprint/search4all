@@ -84,9 +84,10 @@ This project provides some additional configuration items set with environment v
 | `OPENAI_API_KEY`     | Yes      | This is the API key you apply on the OpenAI account page                                                                                                                  | `sk-xxxxxx...xxxxxx`                                                                                                 |
 | `OPENAI_BASE_URL`   | No       | If you manually configure the OpenAI interface proxy, you can use this configuration item to override the default OpenAI API request base URL                             | The default value is<br/>`https://api.openai.com/v1` |                                                           |
 | `LLM_MODEL`      | Yes       | The model you want to use. | `gpt-3.5-turbo-0125`   
-| `RELATED_QUESTIONS`      | Yes       | Show the related questions. | `1`   
-| `NODE_ENV`      | Yes       | The environment required for deployment is necessary only during manual deployment. | `production`   
+| `RELATED_QUESTIONS`      | No       | Show the related questions. | `1`   
+| `NODE_ENV`      | No       | The environment required for deployment is necessary only during manual deployment. | `production`   
 | `BACKEND`      | Yes       | The search service you want. | `SEARCH1API,BING,GOOGLE,SERPER,SEARCHAPI`   
+| `CHAT_HISTORY`      | No       | Continue to ask about the results | `1`   
 | `SEARCH1API_KEY`      | Yes       | If you choose SEARCH1API. | `xxx`   
 | `BING_SEARCH_V7_SUBSCRIPTION_KEY`      | Yes       | If you choose BING. | `xxx`   
 | `GOOGLE_SEARCH_CX`      | Yes       | If you choose GOOGLE. | `xxxx`   
