@@ -27,7 +27,7 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
     return () => {
       controller.abort();
     };
-  }, [query]);
+  }, [query, rid]);
   return (
     <div className="flex flex-col gap-8">
       <Answer markdown={markdown} sources={sources}></Answer>
