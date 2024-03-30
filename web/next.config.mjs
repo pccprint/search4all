@@ -8,6 +8,9 @@ export default (phase, { defaultConfig }) => {
       output: "export",
       assetPrefix: "/ui/",
       basePath: "/ui",
+      experimental: {
+        missingSuspenseWithCSRBailout: false
+      },
       distDir: "../ui"
     };
   } else {
