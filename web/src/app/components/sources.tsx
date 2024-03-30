@@ -31,6 +31,9 @@ const SourceItem: FC<{ source: Source; index: number }> = ({
             className="h-3 w-3"
             alt={domain}
             src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+            width={16}
+            height={16}
+            layout="responsive"
           />
         </div>
       </div>
