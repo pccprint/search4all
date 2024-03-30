@@ -84,6 +84,8 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
                               <Image
                                 className="h-3 w-3"
                                 alt={source.url}
+                                width={source.primaryImageOfPage?.width}
+                                height={source.primaryImageOfPage?.height}
                                 src={`https://www.google.com/s2/favicons?domain=${source.url}&sz=${16}`}
                               />
                             </div>
