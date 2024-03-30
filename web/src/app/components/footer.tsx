@@ -15,10 +15,24 @@ export const Footer: FC = () => {
             href="https://lepton.ai/"
           >
             <Mails size={8} />
-            Lepton AI Website
+            Lepton AI
           </a>
         </div>
         <div>if you need a performant and scalable AI cloud!</div>
+      </div>
+      <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 mt-2 text-zinc-400">
+        <a
+          className="hover:text-zinc-950"
+          href="https://github.com/fatwang2/search4all"
+        >
+          Github
+        </a>
+        <a
+          className="hover:text-zinc-950"
+          href="https://twitter.com/wangwangwangai"
+        >
+          Twitter
+        </a>
       </div>
     </div>
   );
