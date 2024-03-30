@@ -9,6 +9,7 @@ import { Source } from "@/app/interfaces/source";
 import { BookOpenText } from "lucide-react";
 import { FC } from "react";
 import Markdown from "react-markdown";
+import Image from "next/image";
 
 export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
   markdown,
@@ -51,11 +52,12 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
                           <div className="flex gap-4">
                             {source.primaryImageOfPage?.thumbnailUrl && (
                               <div className="flex-none">
-                                <img
+                                <Image
                                   className="rounded h-16 w-16"
                                   width={source.primaryImageOfPage?.width}
                                   height={source.primaryImageOfPage?.height}
                                   src={source.primaryImageOfPage?.thumbnailUrl}
+                                  alt={source.url}
                                 />
                               </div>
                             )}
@@ -79,7 +81,7 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
                               </div>
                             </div>
                             <div className="flex-none flex items-center relative">
-                              <img
+                              <Image
                                 className="h-3 w-3"
                                 alt={source.url}
                                 src={`https://www.google.com/s2/favicons?domain=${source.url}&sz=${16}`}
