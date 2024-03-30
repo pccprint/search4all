@@ -93,7 +93,9 @@ This project provides some additional configuration items set with environment v
 | `GOOGLE_SEARCH_CX`      | Yes       | If you choose GOOGLE. | `xxxx`   
 | `GOOGLE_SEARCH_API_KEY`      | Yes       | If you choose GOOGLE. | `xxx`   
 | `SEARCHAPI_API_KEY`      | Yes       | If you choose SEARCHAPI. | `xxx`   
-| `SERPER_SEARCH_API_KEY`      | Yes       | If you choose SERPER. | `xxx`   
+| `SERPER_SEARCH_API_KEY`      | Yes       | If you choose SERPER. | `xxx`
+| `NEXT_PUBLIC_GOOGLE_ANALYTICS`      | No       | You can use Google Analytics to know how many users you have on your website. | MEASUREMENT ID,you can find on your google analytics account,like `G-XXXXXX`   
+
 
 
 
@@ -101,6 +103,8 @@ This project provides some additional configuration items set with environment v
 - [ ] Support Lepton
 - [ ] Support continuous search
 - [ ] Support More LLMs
+- [x] Support continuous talk about the results
+- [x] Support Google Analytics
 - [x] Support the related questions by function calling
 - [x] Support the Docker
 - [x] Support the Docker-Compose
