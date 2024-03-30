@@ -4,12 +4,12 @@ WORKDIR /app
 
 # Install dependencies
 COPY ./web/package*.json ./
+ENV NODE_ENV production
 RUN npm install
 COPY ./web .
 
 # Compile Next.js and configure distDir
 RUN sed -i 's/distDir:.*/distDir: process.env.NEXT_DIST_DIR || ".\/ui"/' next.config.mjs
-ENV NODE_ENV production
 ENV NEXT_DIST_DIR ./NEXT_BUILD
 RUN npm run build
 
