@@ -3,7 +3,6 @@ import { Wrapper } from "@/app/components/wrapper";
 import { Source } from "@/app/interfaces/source";
 import { BookText } from "lucide-react";
 import { FC } from "react";
-import Image from "next/image";
 
 const SourceItem: FC<{ source: Source; index: number }> = ({
   source,
@@ -27,13 +26,10 @@ const SourceItem: FC<{ source: Source; index: number }> = ({
           </div>
         </div>
         <div className="flex-none flex items-center">
-          <Image
+          <img
             className="h-3 w-3"
             alt={domain}
             src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
-            width={16}
-            height={16}
-            layout="responsive"
           />
         </div>
       </div>
