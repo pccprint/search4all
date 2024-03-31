@@ -29,7 +29,7 @@ export const Footer: FC = () => {
         </a>
         <a
           className="hover:text-zinc-950"
-          href="https://twitter.com/wangwangwangai"
+          href="https://twitter.com/fatwang2ai"
         >
           Twitter
         </a>
