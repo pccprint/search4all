@@ -7,8 +7,8 @@ export const Logo: FC = () => {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="icon icon-tabler icon-tabler-search"
-          width="56"
-          height="56"
+          width="40"
+          height="40"
           viewBox="0 0 24 24"
           stroke-width="2.5"
           stroke="#00abfb"
