@@ -726,10 +726,7 @@ async def query_function(request: sanic.Request):
             messages[1:1] = chat_history
         llm_response = await openai_client.chat.completions.create(
             model=_app.ctx.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": query},
-            ],
+            messages=messages,
             max_tokens=1024,
             stream=True,
             temperature=0.9,
