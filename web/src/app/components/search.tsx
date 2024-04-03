@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import React, { FC, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Locale from "../locales";
 
 interface SearchProps {
   useContinueButton?: boolean; // true: 使用“继续对话”按钮; false: 使用“新的搜索”按钮
@@ -41,7 +42,7 @@ export const Search: FC<SearchProps> = ({ useContinueButton = false }) => {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           autoFocus
-          placeholder="Ask me anything ..."
+          placeholder={Locale.Search.placeholder}
           className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-white"
         />
         <button

@@ -3,6 +3,7 @@ import { Wrapper } from "@/app/components/wrapper";
 import { Source } from "@/app/interfaces/source";
 import { BookText } from "lucide-react";
 import { FC } from "react";
+import Locale from "../locales";
 
 const SourceItem: FC<{ source: Source; index: number }> = ({
   source,
@@ -42,7 +43,7 @@ export const Sources: FC<{ sources: Source[] }> = ({ sources }) => {
     <Wrapper
       title={
         <>
-          <BookText></BookText> Sources
+          <BookText></BookText> {Locale.Sources.sources}
         </>
       }
       content={

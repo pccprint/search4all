@@ -7,6 +7,7 @@ import { Source } from "@/app/interfaces/source";
 import { parseStreaming } from "@/app/utils/parse-streaming";
 import { Annoyed } from "lucide-react";
 import { FC, useEffect, useState } from "react";
+import Locale, { getLang } from "../locales";
 
 export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
   const [sources, setSources] = useState<Source[]>([]);
@@ -19,6 +20,7 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
       controller,
       query,
       rid,
+      getLang(),
       setSources,
       setMarkdown,
       setRelates,
@@ -37,9 +39,7 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <div className="p-4 bg-white shadow-2xl rounded text-blue-500 font-medium flex gap-4">
             <Annoyed></Annoyed>
-            {error === 429
-              ? "Sorry, you have made too many requests recently, try again later."
-              : "Sorry, we might be overloaded, try again later."}
+            {error === 429 ? Locale.Err[429] : Locale.Err[500]}
           </div>
         </div>
       )}

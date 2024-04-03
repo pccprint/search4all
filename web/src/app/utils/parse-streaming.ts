@@ -9,6 +9,7 @@ export const parseStreaming = async (
   controller: AbortController,
   query: string,
   search_uuid: string,
+  lang: string,
   onSources: (value: Source[]) => void,
   onMarkdown: (value: string) => void,
   onRelates: (value: Relate[]) => void,
@@ -28,6 +29,7 @@ export const parseStreaming = async (
     body: JSON.stringify({
       query,
       search_uuid,
+      lang,
     }),
   });
   if (response.status !== 200) {

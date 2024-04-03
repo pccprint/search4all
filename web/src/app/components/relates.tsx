@@ -4,13 +4,14 @@ import { Wrapper } from "@/app/components/wrapper";
 import { Relate } from "@/app/interfaces/relate";
 import { MessageSquareQuote } from "lucide-react";
 import React, { FC } from "react";
+import Locale from "../locales";
 
 export const Relates: FC<{ relates: Relate[] | null }> = ({ relates }) => {
   return (
     <Wrapper
       title={
         <>
-          <MessageSquareQuote></MessageSquareQuote> Related
+          <MessageSquareQuote></MessageSquareQuote> {Locale.Relates.related}
         </>
       }
       content={
@@ -21,7 +22,9 @@ export const Relates: FC<{ relates: Relate[] | null }> = ({ relates }) => {
                 <PresetQuery key={question} query={question}></PresetQuery>
               ))
             ) : (
-              <div className="text-sm">No related questions.</div>
+              <div className="text-sm">
+                {Locale.Relates.no_related_questions}
+              </div>
             )
           ) : (
             <>

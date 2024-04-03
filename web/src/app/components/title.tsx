@@ -3,6 +3,7 @@ import { getSearchUrl } from "@/app/utils/get-search-url";
 import { RefreshCcw } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
+import Locale from "../locales";
 
 export const Title = ({ query }: { query: string }) => {
   const router = useRouter();
@@ -22,7 +23,8 @@ export const Title = ({ query }: { query: string }) => {
           type="button"
           className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-blue-500 hover:bg-zinc-100"
         >
-          <RefreshCcw size={12}></RefreshCcw>Rewrite
+          <RefreshCcw size={12}></RefreshCcw>
+          {Locale.Title.rewrite}
         </button>
       </div>
     </div>
