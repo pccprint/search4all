@@ -10,6 +10,7 @@ import { BookOpenText } from "lucide-react";
 import { FC } from "react";
 import Markdown from "react-markdown";
 import Image from "next/image";
+import Locale from "../locales";
 
 export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
   markdown,
@@ -19,7 +20,7 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
     <Wrapper
       title={
         <>
-          <BookOpenText></BookOpenText> Answer
+          <BookOpenText></BookOpenText> {Locale.Answer.answer}
         </>
       }
       content={
