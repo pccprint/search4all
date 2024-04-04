@@ -9,7 +9,7 @@ The opensource AI search platform
 
 
 ## Features
-- Built-in support for LLM
+- Built-in support for LLM, OpenAI & Groq
 - Built-in support for search engine
 - Customizable pretty UI interface
 - Shareable, cached search results
@@ -25,7 +25,6 @@ To use the Bing Web Search API, please visit [this link](https://www.microsoft.c
 
 ### Google Search
 You have three options for Google Search: you can use the [SearchApi Google Search API](https://www.searchapi.io/) from SearchApi, [Serper Google Search API](https://www.serper.dev) from Serper, or opt for the [Programmable Search Engine](https://developers.google.com/custom-search) provided by Google.
-
 
 ## Deployment
 ### Zeabur
@@ -81,9 +80,9 @@ This project provides some additional configuration items set with environment v
 
 | Environment Variable | Required | Description                                                                                                                                                               | Example                                                                                                              |
 | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`     | Yes      | This is the API key you apply on the OpenAI account page                                                                                                                  | `sk-xxxxxx...xxxxxx`                                                                                                 |
-| `OPENAI_BASE_URL`   | No       | If you manually configure the OpenAI interface proxy, you can use this configuration item to override the default OpenAI API request base URL                             | The default value is<br/>`https://api.openai.com/v1` |                                                           |
-| `LLM_MODEL`      | Yes       | The model you want to use. | `gpt-3.5-turbo-0125`   
+| `OPENAI_API_KEY`     | Yes      | This is the API key you apply on the OpenAI or Groq account page                                                                                                                  | `sk-xxxxxx...xxxxxx`                                                                                                 |
+| `OPENAI_BASE_URL`   | No       | If you manually configure the OpenAI interface proxy, you can use this configuration item to override the default OpenAI API request base URL                             | OpenAI: `https://api.openai.com/v1`<br/>Groq: `https://api.groq.com/openai/v1` |                                                           |
+| `LLM_MODEL`      | Yes       | The model you want to use. | `gpt-3.5-turbo-0125, mixtral-8x7b-32768`   
 | `RELATED_QUESTIONS`      | No       | Show the related questions. | `1`   
 | `NODE_ENV`      | No       | The environment required for deployment is necessary only during manual deployment. | `production`   
 | `BACKEND`      | Yes       | The search service you want. | `SEARCH1API,BING,GOOGLE,SERPER,SEARCHAPI`   
@@ -103,6 +102,7 @@ This project provides some additional configuration items set with environment v
 - [ ] Support Lepton
 - [ ] Support continuous search
 - [ ] Support More LLMs
+- [x] Support Groq
 - [x] Support continuous talk about the results
 - [x] Support Google Analytics
 - [x] Support the related questions by function calling
