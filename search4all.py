@@ -494,7 +494,7 @@ async def get_related_questions(_app, query, contexts):
     """
     Gets related questions based on the query and context.
     """
-    _lepton_more_questions_prompt = """
+    _lepton_more_questions_prompt = r"""
     You are a helpful assistant that helps the user to ask related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups, and write questions no longer than 20 words each. Please make sure that specifics, like events, names, locations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "the Manhattan project", in the follow up question, do not just say "the project", but use the full name "the Manhattan project". Your related questions must be in the same language as the original question.
 
     Here are the contexts of the question:
@@ -508,38 +508,40 @@ async def get_related_questions(_app, query, contexts):
 
     try:
         openai_client = new_async_client(_app)
-        llm_response = await openai_client.chat.completions.create(
-            model=_app.ctx.model,
-            messages=[
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "ask_related_questions",
+                    "description": "Get a list of questions related to the original question and context.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "questions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "A related question to the original question and context.",
+                                }
+                            }
+                        },
+                        "required": ["questions"]
+                    }
+                }
+            }
+        ]
+        messages=[
                 {"role": "system", "content": _lepton_more_questions_prompt},
                 {"role": "user", "content": query},
-            ],
-            max_tokens=512,
-            temperature=0.9,
-            tools=[
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "ask_related_questions",
-                        "description": "Get a list of questions related to the original question and context.",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "questions": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string",
-                                        "description": "A related question to the original question and context.",
-                                    },
-                                }
-                            },
-                        },
-                        "required": ["questions"],
-                    },
-                }
-            ],
-            tool_choice="auto",
-        )
+            ]
+        request_body = {
+            "model": _app.ctx.model,
+            "messages": messages,
+            "max_tokens": 4096,
+            "tools": tools,
+            "tool_choice": "auto",
+        }
+        llm_response = await openai_client.chat.completions.create(**request_body)
         related = llm_response.choices[0].message.tool_calls[0].function.arguments
         if isinstance(related, str):
             related = json.loads(related)
@@ -547,8 +549,7 @@ async def get_related_questions(_app, query, contexts):
         return [{"question": _} for _ in related["questions"][:5]]
     except Exception as e:
         logger.error(
-            "Encountered error while generating related questions:"
-            f" {e}\n{traceback.format_exc()}"
+            f"Encountered error while generating related questions: {str(e)}"
         )
         return []
 
@@ -726,10 +727,7 @@ async def query_function(request: sanic.Request):
             messages[1:1] = chat_history
         llm_response = await openai_client.chat.completions.create(
             model=_app.ctx.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": query},
-            ],
+            messages=messages,
             max_tokens=1024,
             stream=True,
             temperature=0.9,
