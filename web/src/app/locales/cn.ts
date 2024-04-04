@@ -4,7 +4,7 @@ const cn = {
     500: "抱歉，我们可能负载过重，请稍后再试。",
   },
   Title: {
-    rewrite: "重写",
+    home: "首页",
   },
   Search: {
     placeholder: "有问必答...",

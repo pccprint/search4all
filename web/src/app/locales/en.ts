@@ -6,7 +6,7 @@ const en: LocaleType = {
     500: "Sorry, we might be overloaded, try again later.",
   },
   Title: {
-    rewrite: "Rewrite",
+    home: "Home",
   },
   Search: {
     placeholder: "Ask me anything ...",

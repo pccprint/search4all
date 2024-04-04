@@ -539,7 +539,12 @@ async def get_related_questions(_app, query, contexts):
             "messages": messages,
             "max_tokens": 4096,
             "tools": tools,
-            "tool_choice": "auto",
+            "tool_choice": {
+            "type": "function",
+            "function": {
+                "name": "ask_related_questions"
+            }
+            },        
         }
         llm_response = await openai_client.chat.completions.create(**request_body)
         related = llm_response.choices[0].message.tool_calls[0].function.arguments

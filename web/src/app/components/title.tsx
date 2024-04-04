@@ -1,7 +1,5 @@
 "use client";
-import { getSearchUrl } from "@/app/utils/get-search-url";
-import { RefreshCcw } from "lucide-react";
-import { nanoid } from "nanoid";
+import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Locale from "../locales";
 
@@ -18,13 +16,13 @@ export const Title = ({ query }: { query: string }) => {
       <div className="flex-none">
         <button
           onClick={() => {
-            router.push(getSearchUrl(encodeURIComponent(query), nanoid()));
+            window.location.href = window.location.origin;
           }}
           type="button"
           className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-blue-500 hover:bg-zinc-100"
         >
-          <RefreshCcw size={12}></RefreshCcw>
-          {Locale.Title.rewrite}
+          <Home size={12}></Home>
+          {Locale.Title.home}
         </button>
       </div>
     </div>

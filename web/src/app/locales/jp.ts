@@ -6,7 +6,7 @@ const jp: LocaleType = {
     500: "申し訳ありませんが、サーバーが過負荷の可能性があります。後ほど再試行してください。",
   },
   Title: {
-    rewrite: "書き直し",
+    home: "ホーム",
   },
   Search: {
     placeholder: "何でも聞いてください...",
