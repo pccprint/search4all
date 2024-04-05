@@ -18,7 +18,7 @@ The opensource AI search platform
 Choose your search service
 
 ### Search1API
-Search1API is a versatile search aggregation service that enables you to perform searches across Google, Bing, and DuckDuckGo, and also retrieve clear content from URLs. [search1api website]( https://docs.search2ai.online/introduction)
+Search1API is a versatile search aggregation service that enables you to perform searches across Google, Bing, and DuckDuckGo, and also retrieve clear content from URLs. [search1api website]( https://go.search1api.com/homepage)
 
 ### Bing Search
 To use the Bing Web Search API, please visit [this link](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api) to obtain your Bing subscription key.
@@ -103,6 +103,7 @@ This project provides some additional configuration items set with environment v
 - [ ] Support continuous search
 - [ ] Support More LLMs
 - [x] Support Groq
+- [x] Support back to home when searching
 - [x] Support continuous talk about the results
 - [x] Support Google Analytics
 - [x] Support the related questions by function calling
