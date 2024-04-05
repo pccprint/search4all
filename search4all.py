@@ -5,8 +5,9 @@ import re
 import requests
 import traceback
 import httpx
-from typing import Annotated, List, Generator
+from typing import AsyncGenerator
 from openai import AsyncOpenAI
+import anthropic
 from loguru import logger
 from dotenv import load_dotenv
 load_dotenv()
@@ -379,15 +380,19 @@ def search_with_searchapi(query: str, subscription_key: str):
 
 
 def new_async_client(_app):
-    return AsyncOpenAI(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        base_url=os.getenv("OPENAI_BASE_URL"),
-        http_client=_app.ctx.http_session,
-    )
-
+    if "claude-3" in _app.ctx.model.lower():
+        return anthropic.Anthropic(
+            api_key=os.getenv("ANTHROPIC_API_KEY")
+        )
+    else:
+        return AsyncOpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_BASE_URL"),
+            http_client=_app.ctx.http_session,
+        )
 
 @app.before_server_start
-async def server_init(_app, loop):
+async def server_init(_app):
     """
     Initializes global configs.
     """
@@ -456,40 +461,6 @@ async def server_init(_app, loop):
         timeout=httpx.Timeout(connect=10, read=120, write=120, pool=10),
     )
 
-
-async def get_related_questions_bak(_app, query, contexts):
-    """
-    Gets related questions based on the query using the gpt-3.5-turbo model.
-    """
-
-    try:
-        openai_client = new_async_client(_app)
-        llm_response = await openai_client.chat.completions.create(
-            model=_app.ctx.model,
-            messages=[
-                {"role": "system", "content": _more_questions_prompt},
-                {"role": "user", "content": query},
-            ],
-            max_tokens=1024,
-            temperature=0.9,
-        )
-        content = llm_response.choices[0].message.content
-        questions = []
-        for line in content.split('\n'):
-            if line.strip().startswith('1:') or line.strip().startswith('2:') or line.strip().startswith('3:'):
-                question_text = line.split(':', 1)[1].strip()
-                questions.append({"question": question_text})
-        if questions:
-            return questions[:5]
-        else:
-            return []
-    except Exception as e:
-        logger.error(
-            "Encountered error while generating related questions:"
-            f" {e}\n{traceback.format_exc()}"
-        )
-        return []
-
 async def get_related_questions(_app, query, contexts):
     """
     Gets related questions based on the query and context.
@@ -507,14 +478,15 @@ async def get_related_questions(_app, query, contexts):
     )
 
     try:
-        openai_client = new_async_client(_app)
-        tools = [
-            {
-                "type": "function",
-                "function": {
+        logger.info('Start getting related questions')
+        if "claude-3" in _app.ctx.model.lower():
+            logger.info('Using Claude-3 model')
+            client = new_async_client(_app)
+            tools = [
+                {
                     "name": "ask_related_questions",
                     "description": "Get a list of questions related to the original question and context.",
-                    "parameters": {
+                    "input_schema": {
                         "type": "object",
                         "properties": {
                             "questions": {
@@ -527,40 +499,93 @@ async def get_related_questions(_app, query, contexts):
                         },
                         "required": ["questions"]
                     }
+                    
                 }
-            }
-        ]
-        messages=[
-                {"role": "system", "content": _lepton_more_questions_prompt},
+            ]
+            response = client.beta.tools.messages.create(
+                model=_app.ctx.model,
+                system=_lepton_more_questions_prompt,
+                max_tokens=4096,
+                tools=tools,  
+                messages=[
                 {"role": "user", "content": query},
             ]
-        request_body = {
-            "model": _app.ctx.model,
-            "messages": messages,
-            "max_tokens": 4096,
-            "tools": tools,
-            "tool_choice": {
-            "type": "function",
-            "function": {
-                "name": "ask_related_questions"
+            )
+            logger.info('Response received from Claude-3 model')
+
+            if response.content and len(response.content) > 0:
+                tool_use = response.content[0]
+                if tool_use.name == "ask_related_questions":  # 使用点操作符访问属性
+                    related = tool_use.input["questions"]  # 使用点操作符访问属性
+                else:
+                    related = []
+            else:
+                related = []
+            if related and isinstance(related, str):
+                try:
+                    related = json.loads(related)
+                except json.JSONDecodeError:
+                    logger.error("Failed to parse related questions as JSON")
+                    return []
+            logger.info('Successfully got related questions')
+            return [{"question": question} for question in related[:5]] 
+        else:
+            logger.info('Using OpenAI model')
+            openai_client = new_async_client(_app)
+            tools = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "ask_related_questions",
+                        "description": "Get a list of questions related to the original question and context.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "questions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "description": "A related question to the original question and context.",
+                                    }
+                                }
+                            },
+                            "required": ["questions"]
+                        }
+                    }
+                }
+            ]
+            messages=[
+                    {"role": "system", "content": _lepton_more_questions_prompt},
+                    {"role": "user", "content": query},
+                ]
+            request_body = {
+                "model": _app.ctx.model,
+                "messages": messages,
+                "max_tokens": 4096,
+                "tools": tools,
+                "tool_choice": {
+                "type": "function",
+                "function": {
+                    "name": "ask_related_questions"
+                }
+                },        
             }
-            },        
-        }
-        llm_response = await openai_client.chat.completions.create(**request_body)
-        related = llm_response.choices[0].message.tool_calls[0].function.arguments
-        if isinstance(related, str):
-            related = json.loads(related)
-        logger.trace(f"Related questions: {related}")
-        return [{"question": _} for _ in related["questions"][:5]]
+            llm_response = await openai_client.chat.completions.create(**request_body)
+            logger.info('Response received from OpenAI model')
+            related = llm_response.choices[0].message.tool_calls[0].function.arguments
+            if isinstance(related, str):
+                related = json.loads(related)
+            logger.trace(f"Related questions: {related}")
+            return [{"question": _} for _ in related["questions"][:5]]
+
     except Exception as e:
         logger.error(
             f"Encountered error while generating related questions: {str(e)}"
         )
         return []
-
 async def _raw_stream_response(
     _app, contexts, llm_response, related_questions_future
-) -> Generator[str, None, None]:
+) -> AsyncGenerator[str, None]:
     """
     A generator that yields the raw stream response. You do not need to call
     this directly. Instead, use the stream_and_upload_to_kv which will also
@@ -576,9 +601,16 @@ async def _raw_stream_response(
             "(The search engine returned nothing for this query. Please take the"
             " answer with a grain of salt.)\n\n"
         )
-    async for chunk in llm_response:
-        if chunk.choices:
-            yield chunk.choices[0].delta.content or ""
+    
+    if "claude-3" in _app.ctx.model.lower():
+        # Process Claude's stream response
+        async for text in llm_response:
+            yield text
+    else:
+        # Process OpenAI's stream response
+        async for chunk in llm_response:
+            if chunk.choices:
+                yield chunk.choices[0].delta.content or ""
     # Third, yield the related questions. If any error happens, we will just
     # return an empty list.
     if related_questions_future is not None:
@@ -722,42 +754,76 @@ async def query_function(request: sanic.Request):
         )
     )
     try:
-        openai_client = new_async_client(_app)
-        messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": query},
-            ]
-        if chat_history and len(chat_history) % 2 == 0:
-            # 将历史插入到消息中 index = 1 的位置
-            messages[1:1] = chat_history
-        llm_response = await openai_client.chat.completions.create(
-            model=_app.ctx.model,
-            messages=messages,
-            max_tokens=1024,
-            stream=True,
-            temperature=0.9,
-        )
         if _app.ctx.should_do_related_questions and generate_related_questions:
             # While the answer is being generated, we can start generating
             # related questions as a future.
             related_questions_future = get_related_questions(_app, query, contexts)
-
         else:
             related_questions_future = None
+        if "claude-3" in _app.ctx.model.lower():
+            logger.info("Using Claude for generating LLM response")
+            client = new_async_client(_app)
+            messages = [
+                {"role": "user", "content": query}
+            ]
+            if chat_history and len(chat_history) % 2 == 0:
+                # 确保 chat_history 的第一个消息是一个助手消息
+                if chat_history[0]["role"] == "user":
+                    chat_history.insert(0, {"role": "assistant", "content": "okay"})
+                messages[1:1] = chat_history
+            async def _stream_llm_response(stream):
+                for text in stream.text_stream:
+                    yield text
+
+            # 使用Claude生成LLM响应
+            with client.messages.stream(
+                model=_app.ctx.model,
+                max_tokens=1024,
+                system=system_prompt,
+                messages=messages,
+            ) as stream:
+                llm_response = _stream_llm_response(stream)
+                # 处理流式输出
+
+                response = await request.respond(content_type="text/html")
+                # First, stream and yield the results.
+                all_yielded_results = []
+                async for result in _raw_stream_response(
+                    _app, contexts, llm_response, related_questions_future
+                ):
+                    all_yielded_results.append(result)
+                    await response.send(result)
+                logger.info("Finished streaming LLM response")            
+        else:
+            logger.info("Using OpenAI for generating LLM response")
+            openai_client = new_async_client(_app)
+            messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": query},
+                ]
+            if chat_history and len(chat_history) % 2 == 0:
+                # 将历史插入到消息中 index = 1 的位置
+                messages[1:1] = chat_history
+            llm_response = await openai_client.chat.completions.create(
+                model=_app.ctx.model,
+                messages=messages,
+                max_tokens=1024,
+                stream=True,
+                temperature=0.9,
+            )
+            response = await request.respond(content_type="text/html")
+            # First, stream and yield the results.
+            all_yielded_results = []
+            async for result in _raw_stream_response(
+                _app, contexts, llm_response, related_questions_future
+            ):
+                all_yielded_results.append(result)
+                await response.send(result)
+            logger.info("Finished streaming LLM response")            
+
     except Exception as e:
         logger.error(f"encountered error: {e}\n{traceback.format_exc()}")
         return sanic.json({"message": "Internal server error."}, 503)
-
-    response = await request.respond(content_type="text/html")
-    # First, stream and yield the results.
-    all_yielded_results = []
-
-    async for result in _raw_stream_response(
-        _app, contexts, llm_response, related_questions_future
-    ):
-        all_yielded_results.append(result)
-        await response.send(result)
-
     # Second, upload to KV. Note that if uploading to KV fails, we will silently
     # ignore it, because we don't want to affect the user experience.
     await response.eof()
