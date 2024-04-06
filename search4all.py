@@ -7,7 +7,8 @@ import traceback
 import httpx
 from typing import AsyncGenerator
 from openai import AsyncOpenAI
-import anthropic
+import asyncio
+from anthropic import AsyncAnthropic
 from loguru import logger
 from dotenv import load_dotenv
 load_dotenv()
@@ -57,7 +58,7 @@ _default_query = "Who said 'live long and prosper'?"
 # behave differently, and we haven't tuned the prompt to make it optimal - this
 # is left to you, application creators, as an open problem.
 _rag_query_text = """
-You are a large language AI assistant built by Lepton AI. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.
+You are a large language AI assistant built by AI. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.
 
 Your answer must be correct, accurate and written by an expert using an unbiased and professional tone. Please limit to 1024 tokens. Do not give any information that is not related to the question, and do not repeat. Say "information is missing on" followed by the related topic, if the given context do not provide sufficient information.
 
@@ -91,8 +92,6 @@ stop_words = [
 # consecutive requests to the model: one for the answer, and one for the related
 # questions. This is not ideal, but it is a good tradeoff between response time
 # and quality.
-_more_questions_prompt = """
-You are a search term generation assistant for related questions, and can provide 3-5 related question words based on the user's question. Please identify valuable topics to follow up on and write no more than 20 words for each question. Please ensure that the follow-up questions include details such as the event, name, location, etc., so that you can ask independently. For example, if the initial question asks about the "Manhattan Project", then in subsequent questions, don't just say "Project", but use the full name "Manhattan Project". Your answer format must be strictly [1: Question 1 \ n2: Question 2 \ n3: Question 3 \ n4: Question 4 \ n5: Related Question 5] Don't repeat the original question, you must output it in the format I provided!! Each related question should not exceed 20 words. You should output in the same language as the language of the question (for example, English, Chinese, Japanese). Here are the user's questions:"""
 
 
 class KVWrapper(object):
@@ -381,12 +380,12 @@ def search_with_searchapi(query: str, subscription_key: str):
 
 def new_async_client(_app):
     if "claude-3" in _app.ctx.model.lower():
-        return anthropic.Anthropic(
+        return AsyncAnthropic(
             api_key=os.getenv("ANTHROPIC_API_KEY")
         )
     else:
         return AsyncOpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY"),
             base_url=os.getenv("OPENAI_BASE_URL"),
             http_client=_app.ctx.http_session,
         )
@@ -452,7 +451,6 @@ async def server_init(_app):
     _app.ctx.should_do_related_questions = bool(
         os.getenv("RELATED_QUESTIONS") in ("1", "yes", "true")
     )
-    # 是否开始聊天历史的环境变量
     _app.ctx.should_do_chat_history = bool(
         os.getenv("CHAT_HISTORY") in ("1", "yes", "true")
     )
@@ -465,7 +463,7 @@ async def get_related_questions(_app, query, contexts):
     """
     Gets related questions based on the query and context.
     """
-    _lepton_more_questions_prompt = r"""
+    _more_questions_prompt = r"""
     You are a helpful assistant that helps the user to ask related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups, and write questions no longer than 20 words each. Please make sure that specifics, like events, names, locations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "the Manhattan project", in the follow up question, do not just say "the project", but use the full name "the Manhattan project". Your related questions must be in the same language as the original question.
 
     Here are the contexts of the question:
@@ -502,9 +500,9 @@ async def get_related_questions(_app, query, contexts):
                     
                 }
             ]
-            response = client.beta.tools.messages.create(
+            response = await client.beta.tools.messages.create(
                 model=_app.ctx.model,
-                system=_lepton_more_questions_prompt,
+                system=_more_questions_prompt,
                 max_tokens=4096,
                 tools=tools,  
                 messages=[
@@ -512,15 +510,17 @@ async def get_related_questions(_app, query, contexts):
             ]
             )
             logger.info('Response received from Claude-3 model')
+            logger.info(f"Claude-3 response: {response}") 
 
             if response.content and len(response.content) > 0:
-                tool_use = response.content[0]
-                if tool_use.name == "ask_related_questions":  # 使用点操作符访问属性
-                    related = tool_use.input["questions"]  # 使用点操作符访问属性
-                else:
-                    related = []
+                related = []
+                for block in response.content:
+                    if block.type == "tool_use" and block.name == "ask_related_questions":
+                        related = block.input["questions"]
+                        break
             else:
                 related = []
+            
             if related and isinstance(related, str):
                 try:
                     related = json.loads(related)
@@ -555,7 +555,7 @@ async def get_related_questions(_app, query, contexts):
                 }
             ]
             messages=[
-                    {"role": "system", "content": _lepton_more_questions_prompt},
+                    {"role": "system", "content": _more_questions_prompt},
                     {"role": "user", "content": query},
                 ]
             request_body = {
@@ -570,14 +570,47 @@ async def get_related_questions(_app, query, contexts):
                 }
                 },        
             }
-            llm_response = await openai_client.chat.completions.create(**request_body)
-            logger.info('Response received from OpenAI model')
-            related = llm_response.choices[0].message.tool_calls[0].function.arguments
-            if isinstance(related, str):
-                related = json.loads(related)
-            logger.trace(f"Related questions: {related}")
-            return [{"question": _} for _ in related["questions"][:5]]
-
+            try:
+                llm_response = await openai_client.chat.completions.create(**request_body)
+                logger.info(f"OpenAI response: {llm_response}") 
+                
+                if llm_response.choices and llm_response.choices[0].message:
+                    message = llm_response.choices[0].message
+                    
+                    if message.tool_calls:
+                        related = message.tool_calls[0].function.arguments
+                        if isinstance(related, str):
+                            related = json.loads(related)
+                        logger.trace(f"Related questions: {related}")
+                        return [{"question": question} for question in related["questions"][:5]]
+                    
+                    elif message.content:
+                        # 如果不存在 tool_calls 字段,但存在 content 字段,从 content 中提取相关问题
+                        content = message.content
+                        related_questions = content.split('\n')
+                        related_questions = [q.strip() for q in related_questions if q.strip()]
+                        
+                        # 提取带有序号的问题
+                        cleaned_questions = []
+                        for question in related_questions:
+                            if question.startswith('1.') or question.startswith('2.') or question.startswith('3.'):
+                                question = question[3:].strip()  # 去除问题编号和空格
+                                
+                                if question.startswith('"') and question.endswith('"'):
+                                    question = question[1:-1]  # 去除首尾的双引号
+                                elif question.startswith('"'):
+                                    question = question[1:]  # 去除开头的双引号
+                                elif question.endswith('"'):
+                                    question = question[:-1]  # 去除结尾的双引号
+                                
+                                cleaned_questions.append(question)
+                        
+                        logger.trace(f"Related questions: {cleaned_questions}")
+                        return [{"question": question} for question in cleaned_questions[:5]]
+                
+            except Exception as e:
+                    logger.error(f"Error occurred while sending request to OpenAI model: {str(e)}")
+                    return []
     except Exception as e:
         logger.error(
             f"Encountered error while generating related questions: {str(e)}"
@@ -758,42 +791,60 @@ async def query_function(request: sanic.Request):
             # While the answer is being generated, we can start generating
             # related questions as a future.
             related_questions_future = get_related_questions(_app, query, contexts)
-        else:
-            related_questions_future = None
         if "claude-3" in _app.ctx.model.lower():
             logger.info("Using Claude for generating LLM response")
             client = new_async_client(_app)
-            messages = [
-                {"role": "user", "content": query}
+            messages=[
+                {"role": "user", "content": query},
             ]
-            if chat_history and len(chat_history) % 2 == 0:
-                # 确保 chat_history 的第一个消息是一个助手消息
-                if chat_history[0]["role"] == "user":
-                    chat_history.insert(0, {"role": "assistant", "content": "okay"})
-                messages[1:1] = chat_history
-            async def _stream_llm_response(stream):
-                for text in stream.text_stream:
-                    yield text
+            messages = []
+            if chat_history:
+                messages.extend(chat_history)  # 将历史记录添加到列表开头
+            # 然后添加当前查询消息
+            messages.append({"role": "user", "content": query})
+            response = await request.respond(content_type="text/html")
+            all_yielded_results = []
 
-            # 使用Claude生成LLM响应
-            with client.messages.stream(
+            # First, yield the contexts.
+            logger.info("Sending initial context and LLM response marker.")
+            context_str = json.dumps(contexts)
+            await response.send(context_str)
+            all_yielded_results.append(context_str)
+            await response.send("\n\n__LLM_RESPONSE__\n\n")
+            all_yielded_results.append("\n\n__LLM_RESPONSE__\n\n")
+
+            # Second, yield the llm response.
+            if not contexts:
+                warning = "(The search engine returned nothing for this query. Please take the answer with a grain of salt.)\n\n"
+                await response.send(warning)
+                all_yielded_results.append(warning)
+            if related_questions_future is not None:
+                related_questions_task = asyncio.create_task(related_questions_future)
+            async with client.messages.stream(
                 model=_app.ctx.model,
                 max_tokens=1024,
                 system=system_prompt,
-                messages=messages,
-            ) as stream:
-                llm_response = _stream_llm_response(stream)
-                # 处理流式输出
+                messages=messages
+            )as stream:
+                async for text in stream.text_stream:
+                    all_yielded_results.append(text)
+                    await response.send(text)
 
-                response = await request.respond(content_type="text/html")
-                # First, stream and yield the results.
-                all_yielded_results = []
-                async for result in _raw_stream_response(
-                    _app, contexts, llm_response, related_questions_future
-                ):
-                    all_yielded_results.append(result)
+            logger.info("Finished streaming LLM response")
+            # 在生成回复的同时异步等待相关问题任务完成
+            if related_questions_future is not None:
+                try:
+                    logger.info("About to send related questions.")
+                    related_questions = await related_questions_task
+                    logger.info("Related questions sent.")
+                    result = json.dumps(related_questions)
+                    await response.send("\n\n__RELATED_QUESTIONS__\n\n")
+                    all_yielded_results.append("\n\n__RELATED_QUESTIONS__\n\n")
                     await response.send(result)
-                logger.info("Finished streaming LLM response")            
+                    all_yielded_results.append(result)
+                except Exception as e:
+                    logger.error(f"Error during related questions generation: {e}")
+            
         else:
             logger.info("Using OpenAI for generating LLM response")
             openai_client = new_async_client(_app)
@@ -801,6 +852,7 @@ async def query_function(request: sanic.Request):
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": query},
                 ]
+
             if chat_history and len(chat_history) % 2 == 0:
                 # 将历史插入到消息中 index = 1 的位置
                 messages[1:1] = chat_history

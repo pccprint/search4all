@@ -9,10 +9,10 @@ The opensource AI search platform
 
 
 ## Features
-- Built-in support for LLM, OpenAI & Groq
-- Built-in support for search engine
-- Customizable pretty UI interface
-- Shareable, cached search results
+- Integrated support for LLMs, such as OpenAI, Groq, and Claude.
+- Native search engine integration, including Google, Bing, and DuckDuckGo.
+- Customizable, visually appealing user interface.
+- Shareable and cached search results for enhanced efficiency.
 
 ## Setup Search Engine API
 Choose your search service
@@ -28,7 +28,7 @@ You have three options for Google Search: you can use the [SearchApi Google Sear
 
 ## Deployment
 ### Zeabur
-Just click it
+Just click on it
 
 <a href="https://zeabur.com/templates/YHKPET?referralCode=fatwang2"><img src="https://zeabur.com/button.svg" alt="Deploy on Zeabur"/></a>
 
@@ -80,19 +80,21 @@ This project provides some additional configuration items set with environment v
 
 | Environment Variable | Required | Description                                                                                                                                                               | Example                                                                                                              |
 | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`     | Yes      | This is the API key you apply on the OpenAI or Groq account page                                                                                                                  | `sk-xxxxxx...xxxxxx`                                                                                                 |
+| `OPENAI_API_KEY`     | Yes      | This is the API key you apply on the OpenAI account page                                                                                                                  | `sk-xxxxxx...xxxxxx`                                                                                                 |
 | `OPENAI_BASE_URL`   | No       | If you manually configure the OpenAI interface proxy, you can use this configuration item to override the default OpenAI API request base URL                             | OpenAI: `https://api.openai.com/v1`<br/>Groq: `https://api.groq.com/openai/v1` |                                                           |
-| `LLM_MODEL`      | Yes       | The model you want to use. | `gpt-3.5-turbo-0125, mixtral-8x7b-32768`   
+| `GROQ_API_KEY`     | No      | This is the API key you apply on the Groq account page                                                                                                                  | `gsk_xxxxxx...xxxxxx`                                                                                                 |
+| `ANTHROPIC_API_KEY`     | No      | This is the API key you apply on the Claude account page                                                                                                                  | `sk-ant-xxxxxx...xxxxxx`                                                                                                 |
+| `LLM_MODEL`      | Yes       | The model you want to use,support all chat models of openai, groq and claude. | `gpt-3.5-turbo-0125,mixtral-8x7b-32768,claude-3-haiku-20240307...`   
 | `RELATED_QUESTIONS`      | No       | Show the related questions. | `1`   
 | `NODE_ENV`      | No       | The environment required for deployment is necessary only during manual deployment. | `production`   
 | `BACKEND`      | Yes       | The search service you want. | `SEARCH1API,BING,GOOGLE,SERPER,SEARCHAPI`   
 | `CHAT_HISTORY`      | No       | Continue to ask about the results | `1`   
 | `SEARCH1API_KEY`      | Yes       | If you choose SEARCH1API. | `xxx`   
-| `BING_SEARCH_V7_SUBSCRIPTION_KEY`      | Yes       | If you choose BING. | `xxx`   
-| `GOOGLE_SEARCH_CX`      | Yes       | If you choose GOOGLE. | `xxxx`   
-| `GOOGLE_SEARCH_API_KEY`      | Yes       | If you choose GOOGLE. | `xxx`   
-| `SEARCHAPI_API_KEY`      | Yes       | If you choose SEARCHAPI. | `xxx`   
-| `SERPER_SEARCH_API_KEY`      | Yes       | If you choose SERPER. | `xxx`
+| `BING_SEARCH_V7_SUBSCRIPTION_KEY`      | No       | If you choose BING. | `xxx`   
+| `GOOGLE_SEARCH_CX`      | No       | If you choose GOOGLE. | `xxxx`   
+| `GOOGLE_SEARCH_API_KEY`      | No       | If you choose GOOGLE. | `xxx`   
+| `SEARCHAPI_API_KEY`      | No       | If you choose SEARCHAPI. | `xxx`   
+| `SERPER_SEARCH_API_KEY`      | No       | If you choose SERPER. | `xxx`
 | `NEXT_PUBLIC_GOOGLE_ANALYTICS`      | No       | You can use Google Analytics to know how many users you have on your website. | MEASUREMENT ID,you can find on your google analytics account,like `G-XXXXXX`   
 
 
@@ -102,6 +104,7 @@ This project provides some additional configuration items set with environment v
 - [ ] Support Lepton
 - [ ] Support continuous search
 - [ ] Support More LLMs
+- [x] Support Claude
 - [x] Support Groq
 - [x] Support back to home when searching
 - [x] Support continuous talk about the results
