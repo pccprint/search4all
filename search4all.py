@@ -11,6 +11,12 @@ import asyncio
 from anthropic import AsyncAnthropic
 from loguru import logger
 from dotenv import load_dotenv
+import urllib.parse
+import trafilatura
+from trafilatura import bare_extraction
+import tldextract
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse
 load_dotenv()
 
 import sanic
@@ -378,6 +384,88 @@ def search_with_searchapi(query: str, subscription_key: str):
         return []
 
 
+def extract_url_content(url):
+    downloaded = trafilatura.fetch_url(url)
+    content =  trafilatura.extract(downloaded)
+    
+    return {"url":url, "content":content}
+
+
+
+def search_with_searXNG(query:str,url:str, debug=False):
+ 
+    content_list = []
+
+    try:
+
+        safe_string = urllib.parse.quote_plus(":all !general " + query)
+        response = requests.get(url+'?q=' + safe_string + '&format=json')
+        response.raise_for_status()
+        search_results = response.json()
+ 
+        if debug:
+            print("JSON Response:")
+            logger.info(search_results)
+        pedding_urls = []
+
+        conv_links = []
+
+        if search_results.get('results'):
+            for item in search_results.get('results')[0:9]:
+                name = item.get('title')
+                snippet = item.get('content')
+                url = item.get('url')
+                pedding_urls.append(url)
+
+                if url:
+                    url_parsed = urlparse(url)
+                    domain = url_parsed.netloc
+                    icon_url =  url_parsed.scheme + '://' + url_parsed.netloc + '/favicon.ico'
+                    site_name = tldextract.extract(url).domain
+ 
+                conv_links.append({
+                    'site_name':site_name,
+                    'icon_url':icon_url,
+                    'title':name,
+                    'url':url,
+                    'snippet':snippet
+                })
+
+            results = []
+            futures = []
+
+            executor = ThreadPoolExecutor(max_workers=10) 
+            for url in pedding_urls:
+                futures.append(executor.submit(extract_url_content,url))
+            try:
+                for future in futures:
+                    res = future.result(timeout=5)
+                    results.append(res)
+            except concurrent.futures.TimeoutError:
+                print("任务执行超时")
+                executor.shutdown(wait=False,cancel_futures=True)
+
+            for content in results:
+                if content and content.get('content'):
+                    
+                    item_dict = {
+                        "url":content.get('url'),
+                        "name":content.get('url'),
+                        "snippet":content.get('content'),
+                        "content": content.get('content'),
+                        "length":len(content.get('content'))
+                    }
+                    content_list.append(item_dict)
+                if debug:
+                    print("URL: {}".format(url))
+                    print("=================")
+ 
+        return  content_list
+    except Exception as ex:
+        raise ex
+
+
+
 def new_async_client(_app):
     if "claude-3" in _app.ctx.model.lower():
         return AsyncAnthropic(
@@ -435,6 +523,11 @@ async def server_init(_app):
         _app.ctx.search_function = lambda query: search_with_search1api(
             query,
             _app.ctx.search1api_key,
+        )
+    elif _app.ctx.backend == "SEARXNG":
+        _app.ctx.search_function = lambda query: search_with_searXNG(
+            query, 
+            url = os.getenv("SEARXNG_BASE_URL"),
         )
     else:
         raise RuntimeError("Backend must be BING, GOOGLE, SERPER or SEARCHAPI or SEARCH1API.")
