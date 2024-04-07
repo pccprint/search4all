@@ -387,7 +387,8 @@ def search_with_searchapi(query: str, subscription_key: str):
 def extract_url_content(url):
     downloaded = trafilatura.fetch_url(url)
     content =  trafilatura.extract(downloaded)
-    
+    logger.info(url)
+    logger.info(content)
     return {"url":url, "content":content}
 
 
@@ -422,7 +423,7 @@ def search_with_searXNG(query:str,url:str):
                     domain = url_parsed.netloc
                     icon_url =  url_parsed.scheme + '://' + url_parsed.netloc + '/favicon.ico'
                     site_name = tldextract.extract(url).domain
- 
+
                 conv_links.append({
                     'site_name':site_name,
                     'icon_url':icon_url,
@@ -430,7 +431,7 @@ def search_with_searXNG(query:str,url:str):
                     'url':url,
                     'snippet':snippet
                 })
-
+            logger.info(conv_links)
             results = []
             futures = []
 
@@ -444,7 +445,7 @@ def search_with_searXNG(query:str,url:str):
             except concurrent.futures.TimeoutError:
                 logger.error("任务执行超时")
                 executor.shutdown(wait=False,cancel_futures=True)
-
+            logger.info(results)
             for content in results:
                 if content and content.get('content'):
                     
@@ -456,8 +457,8 @@ def search_with_searXNG(query:str,url:str):
                         "length":len(content.get('content'))
                     }
                     content_list.append(item_dict)
-                print("URL: {}".format(url))
-                print("=================")
+                logger.info("URL: {}".format(url))
+                logger.info("=================")
 
         return  content_list
     except Exception as ex:
