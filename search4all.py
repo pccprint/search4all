@@ -392,7 +392,7 @@ def extract_url_content(url):
 
 
 
-def search_with_searXNG(query:str,url:str, debug=False):
+def search_with_searXNG(query:str,url:str):
  
     content_list = []
 
@@ -403,9 +403,9 @@ def search_with_searXNG(query:str,url:str, debug=False):
         response.raise_for_status()
         search_results = response.json()
  
-        if debug:
-            print("JSON Response:")
-            logger.info(search_results)
+ 
+        logger.info("JSON Response:")
+        logger.info(search_results)
         pedding_urls = []
 
         conv_links = []
@@ -442,7 +442,7 @@ def search_with_searXNG(query:str,url:str, debug=False):
                     res = future.result(timeout=5)
                     results.append(res)
             except concurrent.futures.TimeoutError:
-                print("任务执行超时")
+                logger.error("任务执行超时")
                 executor.shutdown(wait=False,cancel_futures=True)
 
             for content in results:
@@ -456,12 +456,12 @@ def search_with_searXNG(query:str,url:str, debug=False):
                         "length":len(content.get('content'))
                     }
                     content_list.append(item_dict)
-                if debug:
-                    print("URL: {}".format(url))
-                    print("=================")
- 
+                print("URL: {}".format(url))
+                print("=================")
+
         return  content_list
     except Exception as ex:
+        logger.error(ex)
         raise ex
 
 
@@ -525,9 +525,10 @@ async def server_init(_app):
             _app.ctx.search1api_key,
         )
     elif _app.ctx.backend == "SEARXNG":
+        logger.info(os.getenv("SEARXNG_BASE_URL"))
         _app.ctx.search_function = lambda query: search_with_searXNG(
             query, 
-            url = os.getenv("SEARXNG_BASE_URL"),
+            os.getenv("SEARXNG_BASE_URL"),
         )
     else:
         raise RuntimeError("Backend must be BING, GOOGLE, SERPER or SEARCHAPI or SEARCH1API.")
