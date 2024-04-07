@@ -385,10 +385,11 @@ def search_with_searchapi(query: str, subscription_key: str):
 
 
 def extract_url_content(url):
+    logger.info(url)
     downloaded = trafilatura.fetch_url(url)
     content =  trafilatura.extract(downloaded)
-    logger.info(url)
-    logger.info(content)
+
+    logger.info(url +"______"+  content)
     return {"url":url, "content":content}
 
 
@@ -399,8 +400,8 @@ def search_with_searXNG(query:str,url:str):
 
     try:
 
-        safe_string = urllib.parse.quote_plus(":all !general " + query)
-        response = requests.get(url+'?q=' + safe_string + '&format=json')
+        safe_string = urllib.parse.quote_plus(":auto !general " + query)
+        response = requests.get(url+'?q=' + safe_string + '&format=json&engines=bing,google')
         response.raise_for_status()
         search_results = response.json()
  
@@ -428,6 +429,7 @@ def search_with_searXNG(query:str,url:str):
                     'site_name':site_name,
                     'icon_url':icon_url,
                     'title':name,
+                    'name':name,
                     'url':url,
                     'snippet':snippet
                 })
@@ -459,7 +461,8 @@ def search_with_searXNG(query:str,url:str):
                     content_list.append(item_dict)
                 logger.info("URL: {}".format(url))
                 logger.info("=================")
-
+        if len(results)== 0 :
+            content_list = conv_links
         return  content_list
     except Exception as ex:
         logger.error(ex)
