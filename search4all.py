@@ -399,7 +399,6 @@ def search_with_searXNG(query:str,url:str):
     content_list = []
 
     try:
-        query="除夕放假么？"
         safe_string = urllib.parse.quote_plus(":auto !general " + query)
         response = requests.get(url+'?q=' + safe_string + '&format=json&engines=bing%2Cgoogle')
         response.raise_for_status()
@@ -436,30 +435,30 @@ def search_with_searXNG(query:str,url:str):
             results = []
             futures = []
 
-            executor = ThreadPoolExecutor(max_workers=10) 
-            for url in pedding_urls:
-                futures.append(executor.submit(extract_url_content,url))
-            try:
-                for future in futures:
-                    res = future.result(timeout=5)
-                    results.append(res)
-            except concurrent.futures.TimeoutError:
-                logger.error("任务执行超时")
-                executor.shutdown(wait=False,cancel_futures=True)
-            logger.info(results)
-            for content in results:
-                if content and content.get('content'):
+            # executor = ThreadPoolExecutor(max_workers=10) 
+            # for url in pedding_urls:
+            #     futures.append(executor.submit(extract_url_content,url))
+            # try:
+            #     for future in futures:
+            #         res = future.result(timeout=5)
+            #         results.append(res)
+            # except concurrent.futures.TimeoutError:
+            #     logger.error("任务执行超时")
+            #     executor.shutdown(wait=False,cancel_futures=True)
+            # logger.info(results)
+            # for content in results:
+            #     if content and content.get('content'):
                     
-                    item_dict = {
-                        "url":content.get('url'),
-                        "name":content.get('url'),
-                        "snippet":content.get('content'),
-                        "content": content.get('content'),
-                        "length":len(content.get('content'))
-                    }
-                    content_list.append(item_dict)
-                logger.info("URL: {}".format(url))
-                logger.info("=================")
+            #         item_dict = {
+            #             "url":content.get('url'),
+            #             "name":content.get('url'),
+            #             "snippet":content.get('content'),
+            #             "content": content.get('content'),
+            #             "length":len(content.get('content'))
+            #         }
+            #         content_list.append(item_dict)
+            #     logger.info("URL: {}".format(url))
+            #     logger.info("=================")
         if len(results)== 0 :
             content_list = conv_links
         return  content_list
