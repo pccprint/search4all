@@ -399,8 +399,8 @@ def search_with_searXNG(query:str,url:str):
     content_list = []
 
     try:
-        safe_string = urllib.parse.quote_plus(":auto !general " + query)
-        response = requests.get(url+'?q=' + safe_string + '&format=json&engines=bing%2Cgoogle')
+        safe_string = urllib.parse.quote_plus(":auto " + query)
+        response = requests.get(url+'?q=' + safe_string + '&category=general&format=json&engines=bing%2Cgoogle')
         response.raise_for_status()
         search_results = response.json()
 
