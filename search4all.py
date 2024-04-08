@@ -399,13 +399,12 @@ def search_with_searXNG(query:str,url:str):
     content_list = []
 
     try:
-
+        query="除夕放假么？"
         safe_string = urllib.parse.quote_plus(":auto !general " + query)
-        response = requests.get(url+'?q=' + safe_string + '&format=json&engines=bing,google')
+        response = requests.get(url+'?q=' + safe_string + '&format=json&engines=bing%2Cgoogle')
         response.raise_for_status()
         search_results = response.json()
- 
- 
+
         logger.info("JSON Response:")
         logger.info(search_results)
         pedding_urls = []
