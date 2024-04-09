@@ -15,7 +15,7 @@ The opensource AI search platform
 
 ## Features
 - Integrated support for LLMs, such as OpenAI, Groq, and Claude.
-- Native search engine integration, including Google, Bing, and DuckDuckGo.
+- Native search engine integration, including Google, Bing, DuckDuckGo and SearXNG Search.
 - Customizable, visually appealing user interface.
 - Shareable and cached search results for enhanced efficiency.
 
