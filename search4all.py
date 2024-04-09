@@ -657,7 +657,7 @@ async def get_related_questions(_app, query, contexts):
             request_body = {
                 "model": _app.ctx.model,
                 "messages": messages,
-                "max_tokens": 4096,
+                "max_tokens": 1000,
                 "tools": tools,
                 "tool_choice": {
                 "type": "function",
