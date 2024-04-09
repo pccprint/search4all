@@ -32,7 +32,7 @@ To use the Bing Web Search API, please visit [this link](https://www.microsoft.c
 You have three options for Google Search: you can use the [SearchApi Google Search API](https://www.searchapi.io/) from SearchApi, [Serper Google Search API](https://www.serper.dev) from Serper, or opt for the [Programmable Search Engine](https://developers.google.com/custom-search) provided by Google.
 
 ### SearXNG Search
-you can host your personal [SearXNG server](https://github.com/searxng/searxng), then you do not need pay for the search api. You just need provide the server address in `SEARXNG_BASE_URL`, Be sure you enable the json format for the SearXNG server.
+you can host your personal [SearXNG server](https://github.com/searxng/searxng), then you do not need pay for the search api. You just need provide the server address in `SEARXNG_BASE_URL`, plz be sure you enable the json format for the SearXNG server.
 
 ## Deployment
 ### Zeabur

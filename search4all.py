@@ -404,8 +404,6 @@ def search_with_searXNG(query:str,url:str):
         response.raise_for_status()
         search_results = response.json()
 
-        logger.info("JSON Response:")
-        logger.info(search_results)
         pedding_urls = []
 
         conv_links = []
@@ -431,7 +429,6 @@ def search_with_searXNG(query:str,url:str):
                     'url':url,
                     'snippet':snippet
                 })
-            logger.info(conv_links)
             results = []
             futures = []
 
@@ -606,7 +603,6 @@ async def get_related_questions(_app, query, contexts):
             ]
             )
             logger.info('Response received from Claude-3 model')
-            logger.info(f"Claude-3 response: {response}") 
 
             if response.content and len(response.content) > 0:
                 related = []
