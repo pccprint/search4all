@@ -112,6 +112,7 @@ This project provides some additional configuration items set with environment v
 - [ ] Support Lepton
 - [ ] Support continuous search
 - [ ] Support More LLMs
+- [x] Support Searxng Search
 - [x] Support Claude
 - [x] Support Groq
 - [x] Support back to home when searching
