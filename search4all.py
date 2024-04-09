@@ -599,7 +599,7 @@ async def get_related_questions(_app, query, contexts):
             response = await client.beta.tools.messages.create(
                 model=_app.ctx.model,
                 system=_more_questions_prompt,
-                max_tokens=4096,
+                max_tokens=1000,
                 tools=tools,  
                 messages=[
                 {"role": "user", "content": query},
