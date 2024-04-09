@@ -11,6 +11,12 @@ import asyncio
 from anthropic import AsyncAnthropic
 from loguru import logger
 from dotenv import load_dotenv
+import urllib.parse
+import trafilatura
+from trafilatura import bare_extraction
+import tldextract
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse
 load_dotenv()
 
 import sanic
@@ -378,6 +384,90 @@ def search_with_searchapi(query: str, subscription_key: str):
         return []
 
 
+def extract_url_content(url):
+    logger.info(url)
+    downloaded = trafilatura.fetch_url(url)
+    content =  trafilatura.extract(downloaded)
+
+    logger.info(url +"______"+  content)
+    return {"url":url, "content":content}
+
+
+
+def search_with_searXNG(query:str,url:str):
+ 
+    content_list = []
+
+    try:
+        safe_string = urllib.parse.quote_plus(":auto " + query)
+        response = requests.get(url+'?q=' + safe_string + '&category=general&format=json&engines=bing%2Cgoogle')
+        response.raise_for_status()
+        search_results = response.json()
+
+        logger.info("JSON Response:")
+        logger.info(search_results)
+        pedding_urls = []
+
+        conv_links = []
+
+        if search_results.get('results'):
+            for item in search_results.get('results')[0:9]:
+                name = item.get('title')
+                snippet = item.get('content')
+                url = item.get('url')
+                pedding_urls.append(url)
+
+                if url:
+                    url_parsed = urlparse(url)
+                    domain = url_parsed.netloc
+                    icon_url =  url_parsed.scheme + '://' + url_parsed.netloc + '/favicon.ico'
+                    site_name = tldextract.extract(url).domain
+
+                conv_links.append({
+                    'site_name':site_name,
+                    'icon_url':icon_url,
+                    'title':name,
+                    'name':name,
+                    'url':url,
+                    'snippet':snippet
+                })
+            logger.info(conv_links)
+            results = []
+            futures = []
+
+            # executor = ThreadPoolExecutor(max_workers=10) 
+            # for url in pedding_urls:
+            #     futures.append(executor.submit(extract_url_content,url))
+            # try:
+            #     for future in futures:
+            #         res = future.result(timeout=5)
+            #         results.append(res)
+            # except concurrent.futures.TimeoutError:
+            #     logger.error("任务执行超时")
+            #     executor.shutdown(wait=False,cancel_futures=True)
+            # logger.info(results)
+            # for content in results:
+            #     if content and content.get('content'):
+                    
+            #         item_dict = {
+            #             "url":content.get('url'),
+            #             "name":content.get('url'),
+            #             "snippet":content.get('content'),
+            #             "content": content.get('content'),
+            #             "length":len(content.get('content'))
+            #         }
+            #         content_list.append(item_dict)
+            #     logger.info("URL: {}".format(url))
+            #     logger.info("=================")
+        if len(results)== 0 :
+            content_list = conv_links
+        return  content_list
+    except Exception as ex:
+        logger.error(ex)
+        raise ex
+
+
+
 def new_async_client(_app):
     if "claude-3" in _app.ctx.model.lower():
         return AsyncAnthropic(
@@ -435,6 +525,12 @@ async def server_init(_app):
         _app.ctx.search_function = lambda query: search_with_search1api(
             query,
             _app.ctx.search1api_key,
+        )
+    elif _app.ctx.backend == "SEARXNG":
+        logger.info(os.getenv("SEARXNG_BASE_URL"))
+        _app.ctx.search_function = lambda query: search_with_searXNG(
+            query, 
+            os.getenv("SEARXNG_BASE_URL"),
         )
     else:
         raise RuntimeError("Backend must be BING, GOOGLE, SERPER or SEARCHAPI or SEARCH1API.")
@@ -503,7 +599,7 @@ async def get_related_questions(_app, query, contexts):
             response = await client.beta.tools.messages.create(
                 model=_app.ctx.model,
                 system=_more_questions_prompt,
-                max_tokens=4096,
+                max_tokens=1000,
                 tools=tools,  
                 messages=[
                 {"role": "user", "content": query},
@@ -561,7 +657,7 @@ async def get_related_questions(_app, query, contexts):
             request_body = {
                 "model": _app.ctx.model,
                 "messages": messages,
-                "max_tokens": 4096,
+                "max_tokens": 1000,
                 "tools": tools,
                 "tool_choice": {
                 "type": "function",
